@@ -9,6 +9,11 @@ class Ball:
         self.vx = xVelocity
         self.vy = yVelocity
         self.friction = friction
+        self.color = color
+        self.vector_line = None
+        self.speed_label = None
+        self.show_vector = True
+        self.show_speed = True
     
     def create_circle(self, x, y, r, canvas, color): #center coordinates, radius
         x0 = x - r
@@ -29,15 +34,18 @@ class Ball:
             self.vx *= (1 - self.friction * dt)
             self.vy *= (1 - self.friction * dt)
 
-        if abs(self.vx) < 1: 
+        if abs(self.vx) < 5: 
             self.vx = 0
-        if abs(self.vy) < 1: 
+        if abs(self.vy) < 5: 
             self.vy = 0
 
         dx = self.vx * dt
         dy = self.vy * dt
 
         self.canvas.move(self.image, dx, dy)
+
+        self.drawVelocityVector()
+        self.updateSpeedLabel()
     
     def checkCollision(self, other):
         x0, y0 = self.center()
@@ -88,3 +96,45 @@ class Ball:
     
     def speed(self):
         return math.sqrt(self.vx*self.vx + self.vy*self.vy)
+    
+    def drawVelocityVector(self, scale=0.2, color="black"):
+        #remove previous if exists
+        if(self.vector_line):
+            self.canvas.delete(self.vector_line)
+        
+        #only draw if moving
+        if(abs(self.vx) > 0 or abs(self.vy) > 0):
+            cx, cy = self.center()
+            end_x = cx + self.vx * scale
+            end_y = cy + self.vy * scale
+            
+            min_length = 5
+            vector_length = math.sqrt((end_x - cx)*(end_x - cx) + (end_y - cy)*(end_y - cy))
+            if((vector_length < min_length) and (vector_length > 0)):
+                    scale_factor = min_length / vector_length
+                    end_x = cx + self.vx * scale * scale_factor
+                    end_y = cy + self.vy * scale * scale_factor
+            
+            self.vector_line = self.canvas.create_line(
+                cx, cy, end_x, end_y, 
+                arrow="last", fill=color, width=2, arrowshape=(8, 10, 5)
+            )
+
+    def updateSpeedLabel(self):
+        #remove previous if exists
+        if self.speed_label:
+            self.canvas.delete(self.speed_label)
+        
+        cx, cy = self.center()
+        speed_value = self.speed()
+        if speed_value > 0:
+            self.speed_label = self.canvas.create_text(
+                cx, cy - self.r - 10,
+                text=f"{speed_value:.0f}",
+                fill="yellow" if self.color == "black" else "black",
+                font=("Arial", 10, "bold")
+            )
+    
+    def setVelocity(self, vx, vy):
+        self.vx = vx
+        self.vy = vy
