@@ -4,26 +4,26 @@ import time
 
 root = tk.Tk()
 
-# Window properties
+#window properties
 root.title("Symulacja kuli billardowych")
 root.configure(background="yellow")
 root.minsize(1200, 800)
 root.maxsize(1200, 800)
 root.geometry("900x600+700+400")
 
-# Frames
+#frames
 frameValues = tk.Frame(root, width=250, height=800, bg="red")
 myCanvas = tk.Canvas(root, width=950, height=800, bg="SpringGreen4")
 
 myCanvas.place(x=0, y=0, anchor="nw", width=950, height=800)
 frameValues.place(x=950, y=0, anchor="nw", width=250, height=800)
 
-# Values
+#values
 value1, value2 = 1, 1
-last_time = time.perf_counter()
+last_time = time.perf_counter() 
 fps_time = time.perf_counter()
 
-# Input frame
+#input frame
 def get_inputs():
     global value1, value2
     value1 = value1_entry.get()
@@ -38,9 +38,11 @@ value2_entry.pack()
 
 tk.Button(frameValues, text="Enter", command=get_inputs, width=18).pack(pady=10, padx=30)
 
-# Balls
-whiteBall = Ball(myCanvas, 100, 100, 40, 500, 500, 0.4, "white")
+#balls
+whiteBall = Ball(myCanvas, 100, 100, 40, 0, 500, 0, "white")
+redBall = Ball(myCanvas, 150, 600, 40, 0, 0, 0, "red")
 
+#main loop
 def animate():
     global last_time, frame_count, fps_time
 
@@ -49,6 +51,12 @@ def animate():
     last_time = now
 
     whiteBall.move(dt)
+    redBall.move(dt)
+
+    whiteBall.checkCollision(redBall)
+
+    
+
     root.after(1, animate)
 
 animate()

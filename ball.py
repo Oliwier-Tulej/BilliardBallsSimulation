@@ -1,7 +1,10 @@
+import math
+
 class Ball:
     
     def __init__(self, canvas, x, y, r, xVelocity, yVelocity, friction, color):
         self.canvas = canvas
+        self.r = r
         self.image = self.create_circle(x, y, r, canvas, color)
         self.vx = xVelocity
         self.vy = yVelocity
@@ -22,8 +25,9 @@ class Ball:
         if(coordinates[3] >= (self.canvas.winfo_height()) or coordinates[1] < 0):
             self.vy = -self.vy
 
-        self.vx *= (1 - self.friction * dt)
-        self.vy *= (1 - self.friction * dt)
+        if(self.speed() > 0):
+            self.vx *= (1 - self.friction * dt)
+            self.vy *= (1 - self.friction * dt)
 
         if abs(self.vx) < 1: 
             self.vx = 0
@@ -34,3 +38,53 @@ class Ball:
         dy = self.vy * dt
 
         self.canvas.move(self.image, dx, dy)
+    
+    def checkCollision(self, other):
+        x0, y0 = self.center()
+        x1, y1 = other.center()
+
+        dx = x1 - x0
+        dy = y1 - y0
+
+        distance = math.sqrt(dx*dx + dy*dy)
+
+        #if no collision end function
+        if ((distance > (self.r + other.r)) or (distance == 0)):
+            return
+        
+        #normal vector
+        nx = dx / distance
+        ny = dy / distance
+
+        #tangential vecctor
+        tx = -ny
+        ty = nx
+
+        v1n = (self.vx * nx)+(self.vy * ny) #normal vector speed
+        v1t = (self.vx * tx)+(self.vy * ty) #tangential vector speed
+        v2n = (other.vx * nx)+(other.vy * ny) #normal vector speed
+        v2t = (other.vx * tx)+(other.vy * ty) #tangential vector speed
+
+        #elastic collision
+        m = 0.16
+        v1n_prime = (v1n * (m - m) + 2 * m * v2n) / (m + m)
+        v2n_prime = (v2n * (m - m) + 2 * m * v1n) / (m + m)
+        
+        #coverting to vector
+        self.vx = v1n_prime * nx + v1t * tx
+        self.vy = v1n_prime * ny + v1t * ty
+        other.vx = v2n_prime * nx + v2t * tx
+        other.vy = v2n_prime * ny + v2t * ty
+
+        #separating
+        overlap = self.r + other.r - distance
+        if overlap > 0:
+            self.canvas.move(self.image, -nx * overlap * 0.6, -ny * overlap * 0.6)
+            self.canvas.move(other.image, nx * overlap * 0.6, ny * overlap * 0.6)
+
+    def center(self):
+        coordinates = self.canvas.coords(self.image)
+        return (coordinates[2]+coordinates[0])/2, (coordinates[3]+coordinates[1])/2
+    
+    def speed(self):
+        return math.sqrt(self.vx*self.vx + self.vy*self.vy)
