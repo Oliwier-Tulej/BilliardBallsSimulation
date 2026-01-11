@@ -24,10 +24,13 @@ class Ball:
     
     def move(self, dt):
         coordinates = self.canvas.coords(self.image)
+        canvasWidth = self.canvas.winfo_width()
+        canvasHeight = self.canvas.winfo_height()
 
-        if(coordinates[2] >= (self.canvas.winfo_width()) or coordinates[0] < 0):
+
+        if((coordinates[2] >= canvasWidth) or (coordinates[0] < 0)):
             self.vx = -self.vx
-        if(coordinates[3] >= (self.canvas.winfo_height()) or coordinates[1] < 0):
+        if((coordinates[3] >= canvasHeight) or (coordinates[1] < 0)):
             self.vy = -self.vy
 
         if(self.speed() > 0):
@@ -44,8 +47,10 @@ class Ball:
 
         self.canvas.move(self.image, dx, dy)
 
-        self.drawVelocityVector()
-        self.updateSpeedLabel()
+        if(self.show_vector):
+            self.drawVelocityVector()
+        if(self.show_speed):
+            self.updateSpeedLabel()
     
     def checkCollision(self, other):
         x0, y0 = self.center()
@@ -97,7 +102,7 @@ class Ball:
     def speed(self):
         return math.sqrt(self.vx*self.vx + self.vy*self.vy)
     
-    def drawVelocityVector(self, scale=0.2, color="black"):
+    def drawVelocityVector(self, scale=0.2):
         #remove previous if exists
         if(self.vector_line):
             self.canvas.delete(self.vector_line)
@@ -117,7 +122,7 @@ class Ball:
             
             self.vector_line = self.canvas.create_line(
                 cx, cy, end_x, end_y, 
-                arrow="last", fill=color, width=2, arrowshape=(8, 10, 5)
+                arrow="last", fill="yellow" if self.color == "black" else "black" , width=2, arrowshape=(8, 10, 5)
             )
 
     def updateSpeedLabel(self):
