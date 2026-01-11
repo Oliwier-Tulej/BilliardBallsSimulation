@@ -28,7 +28,6 @@ friction.set("0.4")
 show_vectors = tk.BooleanVar(value=True)
 show_speed = tk.BooleanVar(value=True)
 last_time = time.perf_counter() 
-fps_time = time.perf_counter()
 isRunning = False
 startingVector = None
 
@@ -66,8 +65,7 @@ def resetBalls():
         dy = y - cy
         myCanvas.move(b.image, dx, dy)
 
-        b.vx = 0
-        b.vy = 0
+        b.setVelocity(0,0)
 
         if b.vector_line:
             myCanvas.delete(b.vector_line)
@@ -131,7 +129,7 @@ myCanvas.create_text(35, 775, text="Y", fill="black", font=("Arial", 10, "bold")
 
 #main loop
 def animate():
-    global last_time, frame_count, fps_time, startingVector
+    global last_time, frame_count, startingVector
 
     #delta time
     now = time.perf_counter()

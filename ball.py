@@ -27,7 +27,6 @@ class Ball:
         canvasWidth = self.canvas.winfo_width()
         canvasHeight = self.canvas.winfo_height()
 
-
         if((coordinates[2] >= canvasWidth) or (coordinates[0] < 0)):
             self.vx = -self.vx
         if((coordinates[3] >= canvasHeight) or (coordinates[1] < 0)):
@@ -73,17 +72,18 @@ class Ball:
         tx = -ny
         ty = nx
 
+        #velocity decomposition
         v1n = (self.vx * nx)+(self.vy * ny) #normal vector speed
         v1t = (self.vx * tx)+(self.vy * ty) #tangential vector speed
         v2n = (other.vx * nx)+(other.vy * ny) #normal vector speed
         v2t = (other.vx * tx)+(other.vy * ty) #tangential vector speed
 
         #elastic collision
-        m = 0.16
-        v1n_prime = (v1n * (m - m) + 2 * m * v2n) / (m + m)
-        v2n_prime = (v2n * (m - m) + 2 * m * v1n) / (m + m)
+        #m = 0.16
+        v1n_prime = v2n         #it should be: (v1n * (m - m) + 2 * m * v2n) / (m + m) , but with the same mass its just v2n
+        v2n_prime = v1n         #              (v2n * (m - m) + 2 * m * v1n) / (m + m)                                   v1n
         
-        #coverting to vector
+        #coverting to velocity
         self.vx = v1n_prime * nx + v1t * tx
         self.vy = v1n_prime * ny + v1t * ty
         other.vx = v2n_prime * nx + v2t * tx
